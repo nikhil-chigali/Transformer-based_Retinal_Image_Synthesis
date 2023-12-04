@@ -70,13 +70,13 @@ class ResViT_Generator(nn.Module):
         )
         self.art_2 = ART_block(self.config, input_dim, img_size, transformer=None)
         self.art_3 = ART_block(self.config, input_dim, img_size, transformer=None)
-        self.art_4 = ART_block(self.config, input_dim, img_size, transformer=None)
-        self.art_5 = ART_block(self.config, input_dim, img_size, transformer=None)
+        # self.art_4 = ART_block(self.config, input_dim, img_size, transformer=None)
+        # self.art_5 = ART_block(self.config, input_dim, img_size, transformer=None)
         self.art_6 = ART_block(
             self.config, input_dim, img_size, transformer=self.transformer_encoder
         )
         self.art_7 = ART_block(self.config, input_dim, img_size, transformer=None)
-        self.art_8 = ART_block(self.config, input_dim, img_size, transformer=None)
+        # self.art_8 = ART_block(self.config, input_dim, img_size, transformer=None)
         self.art_9 = ART_block(self.config, input_dim, img_size, transformer=None)
 
         # Layer13-Decoder1
@@ -141,11 +141,11 @@ class ResViT_Generator(nn.Module):
         x = self.art_1(x)
         x = self.art_2(x)
         x = self.art_3(x)
-        x = self.art_4(x)
-        x = self.art_5(x)
+        # x = self.art_4(x)
+        # x = self.art_5(x)
         x = self.art_6(x)
         x = self.art_7(x)
-        x = self.art_8(x)
+        # x = self.art_8(x)
         x = self.art_9(x)
 
         # decoder

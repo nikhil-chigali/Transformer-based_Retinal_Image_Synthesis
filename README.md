@@ -1,4 +1,4 @@
-# Transformer-based_Retinal_Image_Synthesis
+# Retinal Image Synthesis using ResViT
 
 # Dataset
 

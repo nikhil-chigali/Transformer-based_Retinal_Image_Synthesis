@@ -1,71 +1,85 @@
-import pandas as pd
+import numpy as np
 import torch
 import torchvision.transforms as transforms
-from torch.utils.data import Dataset, DataLoader
-from skimage import io
-from PIL import Image
-import os
+import torch.utils.data as data
+from torch.utils.data import DataLoader
+import torchvision.transforms.functional as F
+
+from .configs import data_configs, path_configs
+from .dataset import ImageDataset
 
 
-class ImageDataset(Dataset):
-    def __init__(self, images_dir: str, csv_path: str, transform: transforms = None):
-        if not os.path.isfile(csv_path):
-            create_csv(images_dir, csv_path)
-        self.dataset_df = pd.read_csv(csv_path)
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.dataset_df)
-
-    def __getitem__(self, idx):
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
-
-        img_path = self.dataset_df.iloc[idx, 0]
-
-        image = Image.fromarray(io.imread(img_path))
-
-        if self.transform:
-            image = self.transform(image)
-        sample = {"X": image}
-        return sample
+class SquarePad:
+    def __call__(self, image):
+        w, h = image.size
+        max_wh = np.max([w, h])
+        hp = int((max_wh - w) / 2)
+        vp = int((max_wh - h) / 2)
+        padding = (hp, vp, hp, vp)
+        return F.pad(image, padding, 0, "constant")
 
 
-def create_csv(images_dir: str, csv_path: str) -> int:
-    image_paths = []
-    for root, dirs, imgs in os.walk(images_dir):
-        if len(imgs) == 0:
-            continue
-        for img in imgs:
-            img_path = os.path.join(root, img)
-            image_paths.append(img_path)
-    csv_data = {"ImagePaths": image_paths}
-    csv_df = pd.DataFrame(csv_data)
-    print(f"CSV file saved at: {csv_path}")
-    csv_df.to_csv(csv_path, index=False)
-    return len(csv_df)
+def get_dataloader(dataset, train=True):
+    data_cfg = data_configs()
+    val_size = 0.1
+    if train:
+        dataset_size = len(dataset)
+        val_size = int(dataset_size * val_size)
+
+        indices = list(range(dataset_size))
+
+        np.random.shuffle(indices)
+        train_indices, val_indices = indices[val_size:], indices[:val_size]
+
+        train_sampler = data.sampler.SubsetRandomSampler(train_indices)
+        val_sampler = data.sampler.SubsetRandomSampler(val_indices)
+
+        train_loader = DataLoader(
+            dataset,
+            batch_size=data_cfg.batch_size,
+            sampler=train_sampler,
+            drop_last=True,
+            num_workers=19,
+            persistent_workers=True,
+        )
+        val_loader = DataLoader(
+            dataset,
+            batch_size=data_cfg.batch_size,
+            sampler=val_sampler,
+            drop_last=True,
+            num_workers=19,
+            persistent_workers=True,
+        )
+
+        return train_loader, val_loader
+    else:
+        test_loader = DataLoader(
+            dataset,
+            batch_size=data_cfg.batch_size,
+            shuffle=False,
+            drop_last=False,
+            num_workers=19,
+            persistent_workers=True,
+        )
+        return test_loader
 
 
-# Set the path to the directory containing images - need to edit the paths accordingly
-images_directory = "Data/Images/"
-# Set the desired CSV file name
-csv_file_path = "Image_data.csv"
-
-# Create the CSV file
-create_csv(images_directory, csv_file_path)
-
-# Read data from the CSV file - for now I kept 244,488- we need to edit this
-transform = transforms.Compose([transforms.Resize((244, 488)), transforms.ToTensor()])
-dataset = ImageDataset(csv_path=csv_file_path, transform=transform)
-# I have choosen batch size to be 4
-loader = DataLoader(dataset, batch_size=4, shuffle=True)
-
-# Print the first three batches ka  images
-for i, batch in enumerate(loader):
-    if i >= 3:
-        break
-    images = batch["X"]
-    print(f"Batch {i+1}, Shape: {images.shape}")
-    for j in range(images.shape[0]):
-        image = transforms.ToPILImage()(images[j]).convert("RGB")
-        image.show()
+def get_dataset():
+    data_cfg = data_configs()
+    path_cfg = path_configs()
+    transform = transforms.Compose(
+        [
+            SquarePad(),
+            transforms.Resize(data_cfg.img_size),
+            # transforms.CenterCrop(data_cfg.img_size),
+            transforms.ToTensor(),
+            transforms.Normalize(0.5, 0.5),
+        ]
+    )
+    test_size = 0.2
+    dataset = ImageDataset(path_cfg.data_path, path_cfg.csv_path, transform)
+    dataset_size = len(dataset)
+    test_size = int(dataset_size * test_size)
+    train_size = dataset_size - test_size
+    trainset, testset = torch.utils.data.random_split(dataset, [train_size, test_size])
+    return trainset, testset

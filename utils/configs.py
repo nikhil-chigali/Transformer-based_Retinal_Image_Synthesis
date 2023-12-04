@@ -1,6 +1,17 @@
 import ml_collections
 
 
+def path_configs():
+    config = ml_collections.ConfigDict()
+    config.pretrained_path = "checkpoints\\resvit.ckpt"
+    config.checkpoint_file = "resvit.ckpt"
+    config.checkpoint_dir = "checkpoints\\"
+    config.data_path = "data\\Images"
+    config.csv_path = "data\\image_paths.csv"
+
+    return config
+
+
 def model_configs():
     config = ml_collections.ConfigDict()
     config.hidden_size = 768
@@ -11,7 +22,6 @@ def model_configs():
     config.transformer.attention_dropout_rate = 0.0
     config.transformer.dropout_rate = 0.1
 
-    config.pretrained_path = "pretrained_models\\checkpoints\\imagenet21k\\R50_ViT.npz"
     config.patch_size = 16
     config.patches = ml_collections.ConfigDict({"size": (16, 16)})
     config.patches.grid = (16, 16)
@@ -22,13 +32,15 @@ def model_configs():
     config.init_type = "xavier"
 
     config.training = ml_collections.ConfigDict()
-    config.training.lr = 0.0002
+    config.training.lr = 0.001
     config.training.beta1 = 0.5
-    config.training.lr_policy = "lambda"
+    config.training.lr_policy = "plateau"
     config.training.niter = 100
     config.training.niter_decay = 100
-    config.training.epoch_count = 1
+    config.training.epoch_count = 50
     config.training.lr_decay_iters = 50
+    config.training.proj_name = "RetinalImageSynthesis"
+    config.training.exp_name = "run0"
 
     return config
 
