@@ -12,7 +12,7 @@ class ART_block(nn.Module):
         super(ART_block, self).__init__()
         self.transformer = transformer
         self.config = config
-        ngf = 64
+        ngf = 4
         mult = 4
         use_bias = False
         norm_layer = nn.BatchNorm2d
@@ -79,7 +79,6 @@ class ART_block(nn.Module):
             setattr(self, "upsample", nn.Sequential(*model))
             # Channel Compression
             self.cc = ChannelCompression(ngf * 8, ngf * 4)
-
         # Residual CNN
         model = [
             ResnetBlock(

@@ -39,9 +39,3 @@ def get_scheduler(optimizer, config):
             "learning rate policy [%s] is not implemented", config.lr_policy
         )
     return scheduler
-
-
-def get_sample_noise(dims):
-    dtype = torch.cuda.FloatTensor if torch.cuda.is_available() else torch.FloatTensor
-
-    return (-2 * torch.rand(dims) + 1).type(dtype)

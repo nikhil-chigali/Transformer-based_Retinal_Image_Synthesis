@@ -78,5 +78,7 @@ class ResnetBlock(nn.Module):
         Returns:
             torch.Tensor: The output tensor.
         """
+        # print(x.shape)
+        # print(self.conv_block(x).shape)
         out = x + self.conv_block(x)
         return out

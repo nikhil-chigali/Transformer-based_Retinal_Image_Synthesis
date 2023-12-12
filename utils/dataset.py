@@ -6,8 +6,6 @@ from skimage import io
 from PIL import Image
 import os
 
-from .funcs import get_sample_noise
-
 
 class ImageDataset(Dataset):
     def __init__(self, images_dir: str, csv_path: str, transform: transforms = None):
@@ -29,8 +27,9 @@ class ImageDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
-        dims = image.shape
-        noise = get_sample_noise(dims)
+        noise = torch.normal(
+            image.mean().item(), image.std().item() * 2, size=image.shape
+        )
         sample = (noise, image)
         return sample
 

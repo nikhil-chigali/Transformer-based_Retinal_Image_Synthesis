@@ -1,14 +1,11 @@
-import torch
 from pytorch_lightning.loggers import WandbLogger
 
-from utils import model_configs, data_configs, path_configs
+from utils import model_configs
 from utils import get_dataloader, get_dataset
 from train import train_model
 
 
 def main():
-    data_cfg = data_configs()
-    path_cfg = path_configs()
     model_cfg = model_configs()
     logger = WandbLogger(
         name=model_cfg.training.exp_name,

@@ -11,7 +11,7 @@ class ResViT_Generator(nn.Module):
         self.config = config
         self.transformer_encoder = Encoder(config)
         norm_layer = nn.BatchNorm2d
-        ngf = 64
+        ngf = 4
         use_bias = False
         mult = 4
 
@@ -52,6 +52,7 @@ class ResViT_Generator(nn.Module):
         mult = 2**i
         model = [
             nn.Conv2d(
+                # ngf,
                 ngf * mult,
                 ngf * mult * 2,
                 kernel_size=3,
@@ -69,13 +70,13 @@ class ResViT_Generator(nn.Module):
             self.config, input_dim, img_size, transformer=self.transformer_encoder
         )
         self.art_2 = ART_block(self.config, input_dim, img_size, transformer=None)
-        self.art_3 = ART_block(self.config, input_dim, img_size, transformer=None)
+        # self.art_3 = ART_block(self.config, input_dim, img_size, transformer=None)
         # self.art_4 = ART_block(self.config, input_dim, img_size, transformer=None)
         # self.art_5 = ART_block(self.config, input_dim, img_size, transformer=None)
         self.art_6 = ART_block(
             self.config, input_dim, img_size, transformer=self.transformer_encoder
         )
-        self.art_7 = ART_block(self.config, input_dim, img_size, transformer=None)
+        # self.art_7 = ART_block(self.config, input_dim, img_size, transformer=None)
         # self.art_8 = ART_block(self.config, input_dim, img_size, transformer=None)
         self.art_9 = ART_block(self.config, input_dim, img_size, transformer=None)
 
@@ -122,6 +123,7 @@ class ResViT_Generator(nn.Module):
         model = [
             nn.ReflectionPad2d(3),
             nn.Conv2d(
+                # int(ngf * mult / 2),
                 ngf,
                 output_dim,
                 kernel_size=7,
@@ -140,11 +142,11 @@ class ResViT_Generator(nn.Module):
         # Information Bottleneck
         x = self.art_1(x)
         x = self.art_2(x)
-        x = self.art_3(x)
+        # x = self.art_3(x)
         # x = self.art_4(x)
         # x = self.art_5(x)
         x = self.art_6(x)
-        x = self.art_7(x)
+        # x = self.art_7(x)
         # x = self.art_8(x)
         x = self.art_9(x)
 

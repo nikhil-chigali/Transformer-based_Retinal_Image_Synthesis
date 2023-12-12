@@ -14,7 +14,7 @@ class NLayerDiscriminator(nn.Module):
     ):
         super(NLayerDiscriminator, self).__init__()
         self.gpu_ids = gpu_ids
-        ndf = 64
+        ndf = 4
         if type(norm_layer) == functools.partial:
             use_bias = norm_layer.func == nn.InstanceNorm2d
         else:

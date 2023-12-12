@@ -1,5 +1,4 @@
 import torch
-import torch.nn as nn
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, LearningRateMonitor
 
@@ -19,8 +18,6 @@ def train_model(
     data_cfg = data_configs()
     path_cfg = path_configs()
     model_cfg = model_configs()
-
-    checkpoint_file = f"resvit_{model_cfg.training.exp_name}"
     torch.set_float32_matmul_precision("medium")
     trainer = pl.Trainer(
         default_root_dir=path_cfg.checkpoint_dir,
@@ -31,10 +28,12 @@ def train_model(
         callbacks=[
             ModelCheckpoint(
                 dirpath=path_cfg.checkpoint_dir,
-                filename=checkpoint_file,
+                filename=path_cfg.checkpoint_file,
                 save_weights_only=True,
-                mode="min",
-                monitor="val_loss",
+                # mode="min",
+                # monitor="val/g_loss_step",
+                every_n_epochs=1,
+                save_on_train_epoch_end=True,
             ),
             LearningRateMonitor(logging_interval="epoch"),
         ],
@@ -42,7 +41,8 @@ def train_model(
     )
     trainer.logger._log_graph = True
 
-    pretrained_model = os.path.join(path_cfg.checkpoint_dir, checkpoint_file)
+    pretrained_model = os.path.join(path_cfg.checkpoint_dir, path_cfg.checkpoint_file)
+    print(f"Pretrained model path: {pretrained_model}")
     # Check if pretrained model already exists
     if load_ckpt:
         if os.path.isfile(pretrained_model):
@@ -56,9 +56,11 @@ def train_model(
             raise FileNotFoundError(f"Model Checkpoint at {pretrained_model} not found")
     if mode == "train":
         model = ResVitModel(model_cfg, data_cfg)
-        print(model)
+        # print(model)
         trainer.fit(model, trainloader, valloader)
+        trainer.save_model()
         # Loading the best model after training
+        print("!!!!!!!!!!!!!!", trainer.checkpoint_callback.best_model_path)
         model = ResVitModel.load_from_checkpoint(
             trainer.checkpoint_callback.best_model_path
         )

@@ -39,16 +39,16 @@ def get_dataloader(dataset, train=True):
             batch_size=data_cfg.batch_size,
             sampler=train_sampler,
             drop_last=True,
-            num_workers=19,
-            persistent_workers=True,
+            num_workers=2,
+            # persistent_workers=True,
         )
         val_loader = DataLoader(
             dataset,
             batch_size=data_cfg.batch_size,
             sampler=val_sampler,
             drop_last=True,
-            num_workers=19,
-            persistent_workers=True,
+            num_workers=2,
+            # persistent_workers=True,
         )
 
         return train_loader, val_loader
@@ -58,8 +58,8 @@ def get_dataloader(dataset, train=True):
             batch_size=data_cfg.batch_size,
             shuffle=False,
             drop_last=False,
-            num_workers=19,
-            persistent_workers=True,
+            # num_workers=19,
+            # persistent_workers=True,
         )
         return test_loader
 
@@ -71,7 +71,6 @@ def get_dataset():
         [
             SquarePad(),
             transforms.Resize(data_cfg.img_size),
-            # transforms.CenterCrop(data_cfg.img_size),
             transforms.ToTensor(),
             transforms.Normalize(0.5, 0.5),
         ]
